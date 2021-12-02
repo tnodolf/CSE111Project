@@ -50,8 +50,14 @@ def index():
     message = ""
     if form.validate_on_submit():
 
-        pre_check = '''SELECT count(*) from player where p_name = "{}", and sport = "{}" '''.format(form.name.data, form.sport.data)
-        if (pre_check != 0):
+        pre_check = '''SELECT count(*) from player where p_name = "{}" and p_sport = "{}" '''.format(form.name.data, form.sport.data)
+        result = conn.execute(pre_check)
+        val = 0
+
+        for row in result:
+            val = row[0]
+
+        if (val != 0):
             error_message = "You've already registered for {}!".format(form.sport.data)
             return render_template('index.html', form=form, message=error_message)
 
