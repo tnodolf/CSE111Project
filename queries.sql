@@ -16,7 +16,7 @@ INSERT INTO Sport
 VALUES
     ('Underwater Basket Weaving', 0, 0);
 
--- Create new league
+-- Create new league (1)
     --create the new league name within the sport, init # teams at 0, init leaguekey to whatever our max is +1
     --increment number of leagues under the sport by 1
 SELECT "CREATES NEW LEAGUE------------------------------";
@@ -162,7 +162,7 @@ WHERE
     m_teamone = 'Basket Gods' or m_teamtwo = 'Basket Gods';
 
 
--- Select team with best record in their league
+-- Select team with best record in their league (2)
 SELECT r_teamname, MAX(recProp)
 FROM 
 (
@@ -197,10 +197,16 @@ WHERE
     l_name = 'UWBW League 1';
 
 
--- Select captain names from matchup
-Select m_date, player1.p_name, player2.p_name from player player1, player player2, match
-where player1.p_team = m_teamone and player2.p_team = m_teamtwo and m_date = '1950-04-20' and player1.p_captain=1 
+-- Select captain names from matchup-date
+Select m_date, player1.p_name, player2.p_name 
+from player player1, player player2, match
+where player1.p_team = m_teamone and 
+player2.p_team = m_teamtwo and 
+m_date = '1950-04-20' and 
+player1.p_captain=1 
 and player2.p_captain=1;
+
+--complexity of queries, number of data tuples in the database(100s in each)
 
 
 
