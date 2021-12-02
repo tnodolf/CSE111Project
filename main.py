@@ -49,13 +49,19 @@ def index():
     form = NameForm()
     message = ""
     if form.validate_on_submit():
+
+        pre_check = '''SELECT count(*) from player where p_name = "{}", and sport = "{}" '''.format(form.name.data, form.sport.data)
+        if (pre_check != 0):
+            error_message = "You've already registered for {}!".format(form.sport.data)
+            return render_template('index.html', form=form, message=error_message)
+
         query = '''INSERT INTO Player VALUES
         ('{}', {}, {}, '{}', 0, '{}')'''.format(form.name.data, form.height.data, form.weight.data, form.team.data, form.sport.data)
         cursor.execute(query)
         conn.commit()
         print("inserted player: {} into db".format(form.name.data))
     conn.close()
-    
+
     return render_template('index.html', form=form, message=message)
 
 
