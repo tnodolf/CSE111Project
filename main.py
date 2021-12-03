@@ -20,7 +20,7 @@ app.config['SECRET_KEY'] = 'tanner-is-marginally-gay'
 Bootstrap(app)
 
 #configuring form
-class NameForm(FlaskForm):
+class PlayerForm(FlaskForm):
     query = '''select s_name from sport'''
     conn = sqlite3.connect(database)
     result = conn.execute(query)
@@ -35,9 +35,12 @@ class NameForm(FlaskForm):
     sport = SelectField('Sport Name:', choices=sportsNames)
     submit = SubmitField('Submit')
 
+class SportForm(FlaskForm):
+    name = StringField('Sport Name:', validators=[DataRequired()])
+    submit = SubmitField('Submit')
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
+@app.route('/player', methods=['GET', 'POST'])
+def player():
     # you must tell the variable 'form' what you named the class, above
     # 'form' is the variable name used in this template: index.html
     # create a database connection
@@ -46,7 +49,7 @@ def index():
 
     #get sport names: 
 
-    form = NameForm()
+    form = PlayerForm()
     message = ""
     if form.validate_on_submit():
 
@@ -59,7 +62,7 @@ def index():
 
         if (val != 0):
             error_message = "You've already registered for {}!".format(form.sport.data)
-            return render_template('index.html', form=form, message=error_message)
+            return render_template('player.html', form=form, message=error_message)
 
         query = '''INSERT INTO Player VALUES
         ('{}', {}, {}, '{}', 0, '{}')'''.format(form.name.data, form.height.data, form.weight.data, form.team.data, form.sport.data)
@@ -68,7 +71,46 @@ def index():
         print("inserted player: {} into db".format(form.name.data))
     conn.close()
 
-    return render_template('index.html', form=form, message=message)
+    return render_template('player.html', form=form, message=message)
+
+
+@app.route('/sport', methods=['GET', 'POST'])
+def sport():
+    # you must tell the variable 'form' what you named the class, above
+    # 'form' is the variable name used in this template: index.html
+    # create a database connection
+    conn = sqlite3.connect(database)
+    cursor = conn.cursor()
+
+    form = SportForm()
+    message = ""
+    
+    sportNames = []
+    sportQuery = '''SELECT s_name from sport'''
+    result = conn.execute(sportQuery)
+    for row in result:
+        sportNames.append(row[0])
+
+    if form.validate_on_submit():
+
+        pre_check = '''SELECT count(*) from sport where s_name = "{}" '''.format(form.name.data)
+        result = conn.execute(pre_check)
+        val = 0
+
+        for row in result:
+            val = row[0]
+
+        if (val != 0):
+            error_message = "The sport {} already exists.".format(form.name.data)
+            return render_template('sport.html', form=form, message=error_message, sportNames=sportNames)
+
+        query = '''INSERT INTO SPORT VALUES ('{}', 0, 0)'''.format(form.name.data)
+        cursor.execute(query)
+        conn.commit()
+        print("created sport: {} in db".format(form.name.data))
+    conn.close()
+
+    return render_template('sport.html', form=form, message=message, sportNames=sportNames)
 
 
 app.run()
