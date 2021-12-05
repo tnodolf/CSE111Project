@@ -1,0 +1,41 @@
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block styles %}
+{{ super() }}
+	<style>
+		body { background: #e8f1f9; }
+	</style>
+{% endblock %}
+
+
+{% block title %}
+Referee Registration
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
+
+      <h1 class="pt-5 pb-2">Referee Registration</h1>
+
+      <p class="lead">Fill this form with the relevant information and then press submit</p>
+
+      {{ wtf.quick_form(form) }}
+
+      <p class="pt-5" style="margin-top:5%;color:tomato"><strong>{{ message }}</strong></p>
+        
+      <p class="pt-5" style="margin-top:5%;"><strong>Current League Names: </strong></p>
+      <ul>
+        {% for name in leagueNames %}
+        <li>{{name}}</li>
+        {% endfor %}
+        </ul>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
