@@ -20,11 +20,17 @@ Sport Creation
   <div class="row">
     <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
 
-      <h1 class="pt-5 pb-2">Create a Sport</h1>
+      <h1 class="pt-5 pb-2">Create a Sport/League</h1>
 
-      <p class="lead">Fill this form with the relevant information and then press submit</p>
+      <p class="lead">Fill either form with the relevant information and then press submit</p>
 
-      {{ wtf.quick_form(form) }}
+      <p class="lead">Create a Sport</p>
+
+      {{ wtf.quick_form(sportForm) }}
+
+      <p class="lead" style="margin-top:5%">Create a League</p>
+
+      {{ wtf.quick_form(leagueForm) }}
 
       <p class="pt-5" style="margin-top:5%;color:tomato"><strong>{{ message }}</strong></p>
 
