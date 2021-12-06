@@ -32,8 +32,10 @@ def player():
         name = StringField('Name:', validators=[DataRequired()])
         height = DecimalField('Height (inches):', validators=[DataRequired()])
         weight = DecimalField('Weight (lbs):', validators=[DataRequired()])
-        team = StringField('Team Name (if free agent leave blank):')
-        sport = SelectField('Sport Name:', choices=sportsNames)
+        sportName = SelectField('Sport Name:', choices=sportsNames)
+        leagueName = SelectField('League name:', choices=[], validate_choice=False)
+        teamName = SelectField('Team Name (if free agent select "free agent"):' , choices=[], validate_choice=False)
+        isCaptain = SelectField('Are you the captain?:', choices= ["Yes", "No"])
         submit = SubmitField('Submit')
     # you must tell the variable 'form' what you named the class, above
     # 'form' is the variable name used in this template: index.html
@@ -47,7 +49,7 @@ def player():
     message = ""
     if form.validate_on_submit():
 
-        pre_check = '''SELECT count(*) from player where p_name = "{}" and p_sport = "{}" '''.format(form.name.data, form.sport.data)
+        pre_check = '''SELECT count(*) from player where p_name = "{}" and p_sport = "{}" '''.format(form.name.data, form.sportName.data)
         result = conn.execute(pre_check)
         val = 0
 
@@ -55,11 +57,17 @@ def player():
             val = row[0]
 
         if (val != 0):
-            error_message = "You've already registered for {}!".format(form.sport.data)
+            error_message = "You've already registered for {}!".format(form.SportName.data)
             return render_template('player.html', form=form, message=error_message)
 
+        isCaptain = 0
+
+        if form.isCaptain.data == "Yes":
+            isCaptain = 1
+
+
         query = '''INSERT INTO Player VALUES
-        ('{}', {}, {}, '{}', 0, '{}')'''.format(form.name.data, form.height.data, form.weight.data, form.team.data, form.sport.data)
+        ('{}', {}, {}, '{}', {}, '{}')'''.format(form.name.data, form.height.data, form.weight.data, form.teamName.data, isCaptain ,form.sportName.data)
         cursor.execute(query)
         conn.commit()
         print("inserted player: {} into db".format(form.name.data))
@@ -285,6 +293,8 @@ def team():
     return render_template('team.html', form=team, message=message)
 
 
+
+#BACKEND ENDPOINTS ACCESSED VIA REQS ONLY
 @app.route('/get-league/<sport>')
 def get_league(sport):
     sport = sport.replace('%20', ' ')
@@ -296,8 +306,31 @@ def get_league(sport):
         leagueObj = {}
         leagueObj['name'] = row[0]
         leagueNames.append(leagueObj)
-    
+
     return jsonify({'league_names' : leagueNames})
+
+@app.route('/get-team/<league>')
+def get_teams(league):
+    league = league.replace('%20', ' ')
+    conn = sqlite3.connect(database)
+
+    query = '''select l_leaguekey from league where l_name="{}" '''.format(league)
+    result = conn.execute(query)
+    leagueKey = None
+    for row in result:
+        leagueKey = row[0]
+
+    query = '''select t_name from team where t_leaguekey = {}'''.format(leagueKey)
+    result = conn.execute(query)
+    teamNames = []
+    for row in result:
+        teamObj = {}
+        teamObj['name'] = row[0]
+        teamNames.append(teamObj)
+    
+    teamNames.append({'name':'Free Agent'})
+
+    return jsonify({'team_names' : teamNames})
     
 
 
