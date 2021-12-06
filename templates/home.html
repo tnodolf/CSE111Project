@@ -1,0 +1,43 @@
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block styles %}
+{{ super() }}
+	<style>
+		body { background: #e8f1f9; }
+	</style>
+{% endblock %}
+
+
+{% block title %}
+Referee Registration
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
+
+      <h1 class="pt-5 pb-2">Home Page</h1>
+
+      <p class="lead">These links will link our to various user functionalities for the project</p>
+    
+      <p class="lead"><a href="//localhost:5000/player">Player Registration</a></p>
+      <p class="lead"><a href="//localhost:5000/team">Team Registration</a></p>
+      <p class="lead"><a href="//localhost:5000/make-match">Schedule a match</a></p>
+      <p class="lead"><a href="//localhost:5000/view-matches">View Schedule</a></p>
+
+      <p class="lead">These links will link our to various admin functionalities for the project</p>
+
+      <p class="lead"><a href="//localhost:5000/sport">Create a New sport</a></p>
+      <p class="lead"><a href="//localhost:5000/referee">Referee Registration</a></p>
+      <p class="lead"><a href="//localhost:5000/add-score">Score a match</a></p>
+    
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

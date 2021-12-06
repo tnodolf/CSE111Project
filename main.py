@@ -22,6 +22,12 @@ app.config['SECRET_KEY'] = 'tanner-is-marginally-gay'
 # Flask-Bootstrap requires this line
 Bootstrap(app)
 
+@app.route('/home', methods=['GET', 'POST'])
+def home():
+    return render_template('home.html')
+
+
+
 @app.route('/player', methods=['GET', 'POST'])
 def player():
     class PlayerForm(FlaskForm):
@@ -519,7 +525,6 @@ def get_lineup(date):
 '''
 TOD-O:
  Page to show players on teams, filter down from sport
- Central page with branching links to paths?
 '''
 
 
