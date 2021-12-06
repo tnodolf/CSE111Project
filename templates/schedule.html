@@ -1,0 +1,68 @@
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block styles %}
+{{ super() }}
+	<style>
+		body { background: #e8f1f9; }
+        .scoreText{
+            font-size:100%;
+            margin-bottom:5%;
+        }
+        .score-container {
+        display: flex;
+        flex-wrap: wrap;
+        }
+
+        .article {
+        flex: 0 0 50%;
+        padding: 10px;
+        }
+
+        * {
+        margin: 0;
+        box-sizing: border-box;
+        }
+	</style>
+{% endblock %}
+
+
+{% block title %}
+Schedule
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
+
+      <h1 class="pt-5 pb-2">Scheduled Matches</h1>
+
+      <p class="lead">Select a date and then press submit</p>
+
+      {{ wtf.quick_form(form) }}
+
+        <div style="margin-top:5%">
+        {% for name in allMatches %}
+        <div class=score-container>
+        <div class=article>
+            <p class=lead>{{name.homeTeam}} scored: {{name.homeScore}}</p>
+            <p> view roster: <a href="//localhost:5000/get-roster/{{name.homeTeam}}" + >{{name.homeTeam}}</a></p>
+         </div>
+         
+         <div class=article>
+            <p class=lead>{{name.awayTeam}} scored: {{name.awayScore}}</p>
+            <p> view roster: <a href="//localhost:5000/get-roster/{{name.awayTeam}}" + >{{name.awayTeam}}</a></p>
+         </div>
+        </div>
+        {% endfor %}
+        </div>
+        
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

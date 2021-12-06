@@ -1,0 +1,62 @@
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block styles %}
+{{ super() }}
+	<style>
+		body { background: #e8f1f9; }
+        .scoreText{
+            font-size:100%;
+        }
+	</style>
+{% endblock %}
+
+
+{% block title %}
+Roster
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
+
+      <h1 class="pt-5 pb-2">Players on Roster</h1>
+
+      <p class="lead">Players listed on the roster</p>
+
+        <style>
+            table, th, td {
+              border:1px solid black;
+            }
+            </style>
+            
+            <table style="width:100%">
+              <tr>
+                <th>Name</th>
+                <th>Height</th>
+                <th>Weight</th>
+                <th>Team</th>
+                <th>Captain</th>
+                <th>Sport</th>
+              </tr>
+              {% for player in allPlayers %}
+              <tr>
+                <td>{{player.name}}</td>
+                <td>{{player.height}}</td>
+                <td>{{player.weight}}</td>
+                <td>{{player.team}}</td>
+                <td>{{player.captain}}</td>
+                <td>{{player.sport}}</td>
+              </tr>
+              {% endfor %}
+            </table>
+        
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

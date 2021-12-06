@@ -10,7 +10,7 @@
 
 
 {% block title %}
-Player Registration
+Referee Registration
 {% endblock %}
 
 
@@ -20,15 +20,14 @@ Player Registration
   <div class="row">
     <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
 
-      <h1 class="pt-5 pb-2">Player Registration</h1>
+      <h1 class="pt-5 pb-2">Match Creation</h1>
 
-      <p class="lead">Fill this form with the relevant information and then press submit</p>
+      <p class="lead">Fill this form with the relevant information and then press submit to schedule a match</p>
 
       {{ wtf.quick_form(form) }}
 
+      <p class="pt-5" style="margin-top:5%;color:tomato"><strong>{{ error_message }}</strong></p>
       <p class="pt-5" style="margin-top:5%;color:green"><strong>{{ success_message }}</strong></p>
-      <p class="pt-5" style="margin-top:5%;color:tomato"><strong>{{ message }}</strong></p>
-
     </div>
   </div>
 </div>
@@ -57,24 +56,27 @@ Player Registration
 </script>
 
 <script>
-    let team_select = document.getElementById('teamName');
+    let home_team_select = document.getElementById('homeTeamName');
+    let away_team_select = document.getElementById('awayTeamName');
 
     league_select.onchange = function() {
         league  = league_select.value;
         fetch('/get-team/' + league).then(function(response){
             
             response.json().then(function(data) {
-                let optionHtml = '';
+                let optionHtml1 = '';
 
                 for (let team of data.team_names){
                     console.log(team.name);
-                    optionHtml += '<option value="' + team.name + '">' + team.name + '</option>';
+                    optionHtml1 += '<option value="' + team.name + '">' + team.name + '</option>';
                 }
 
-                team_select.innerHTML = optionHtml;
+                home_team_select.innerHTML = optionHtml1;
+                away_team_select.innerHTML = optionHtml1;
             });
         });
     }
 </script>
+
 
 {% endblock %}

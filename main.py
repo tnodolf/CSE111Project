@@ -1,8 +1,11 @@
+#random
+import random
+
 #flask imports
 from flask import Flask, render_template, redirect, url_for, jsonify
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, DecimalField, SelectField
+from wtforms import StringField, SubmitField, DecimalField, SelectField, DateField
 from wtforms.validators import DataRequired
 
 #sql imports
@@ -47,6 +50,7 @@ def player():
 
     form = PlayerForm()
     message = ""
+    success_message = ""
     if form.validate_on_submit():
 
         pre_check = '''SELECT count(*) from player where p_name = "{}" and p_sport = "{}" '''.format(form.name.data, form.sportName.data)
@@ -58,7 +62,7 @@ def player():
 
         if (val != 0):
             error_message = "You've already registered for {}!".format(form.SportName.data)
-            return render_template('player.html', form=form, message=error_message)
+            return render_template('player.html', form=form, message=error_message, success_message="")
 
         isCaptain = 0
 
@@ -71,9 +75,11 @@ def player():
         cursor.execute(query)
         conn.commit()
         print("inserted player: {} into db".format(form.name.data))
+        success_message = "created player: {}".format(form.name.data)
+
     conn.close()
 
-    return render_template('player.html', form=form, message=message)
+    return render_template('player.html', form=form, message=message, success_message=success_message)
 
 
 @app.route('/sport', methods=['GET', 'POST'])
@@ -258,7 +264,7 @@ def team():
 
     team = teamForm()
 
-    message = ""
+    success_message = ""
     conn = sqlite3.connect(database)
     cursor = conn.cursor()
 
@@ -289,8 +295,117 @@ def team():
         conn.commit()
         print("created record")
 
+        success_message = "created team {}".format(team.teamName.data)
 
-    return render_template('team.html', form=team, message=message)
+
+    return render_template('team.html', form=team, message=success_message)
+
+
+@app.route('/make-match', methods=['GET', 'POST'])
+def match():
+    class dateForm(FlaskForm):
+        query = '''select s_name from sport'''
+        conn = sqlite3.connect(database)
+        result = conn.execute(query)
+        sportsNames = []
+        for row in result:
+            sportsNames.append(row[0])
+        sportName = SelectField('Sport Name:', choices = sportsNames)
+        leagueName = SelectField('League Name:'  ,choices = [], validate_choice=False)
+        homeTeamName = SelectField('Home Team Name:' , choices=[], validate_choice=False)
+        awayTeamName = SelectField('Away Team Name:' , choices=[], validate_choice=False)
+        date = DateField('Start Date', format='%Y-%m-%d')
+        submit = SubmitField('Submit')
+
+    conn = sqlite3.connect(database)
+    cursor = conn.cursor()
+    
+    matchForm = dateForm()
+    error_message = ""
+    success_message = ""
+
+    if matchForm.validate_on_submit():
+        if (matchForm.awayTeamName.data == matchForm.homeTeamName.data):
+            error_message = "A team must play a different team"
+            return render_template('match.html', form=matchForm, error_message=error_message, success_message=success_message)
+        
+        #Get league key for league name
+        lKey = conn.execute('''SELECT l_leaguekey from league WHERE l_name = "{}" '''.format(matchForm.leagueName.data))
+        for row in lKey:
+            val = row[0]
+
+        #Select all referees
+        result = conn.execute('''select r_name from referee where r_leaguekey = "{}" '''.format(val))
+
+        allRefs = []
+        numRefs = 0
+        refName = ""
+        for ref in result:
+            numRefs += 1
+            allRefs.append(ref[0])
+            refName = ref[0]
+            print(refName)
+
+        if numRefs > 0:
+            refName = allRefs[random.randint(0, numRefs-1)]
+
+        
+        createMatch = '''INSERT INTO Match VALUES ('{}', '{}', '{}', 0, 0, '{}');'''.format(refName, matchForm.homeTeamName.data, matchForm.awayTeamName.data, matchForm.date.data )
+        cursor.execute(createMatch)
+        conn.commit()
+        success_message = "Successfully created match!"
+
+
+    return render_template('match.html', form=matchForm, error_message=error_message, success_message=success_message)
+
+
+@app.route('/view-matches', methods=['GET','POST'])
+def view_matches():
+    class scheduleForm(FlaskForm):
+        date = DateField('Start Date', format='%Y-%m-%d')
+        submit = SubmitField('Submit')
+    
+    conn = sqlite3.connect(database)
+    cursor = conn.cursor()
+    scheduleForm = scheduleForm()
+    allMatches = []
+    
+    if scheduleForm.validate_on_submit():
+        rawMatches = conn.execute('''select * from match where m_date = "{}" '''.format(scheduleForm.date.data))
+
+        for match in rawMatches:
+            matchObj = {}
+            matchObj['Referee'] = match[0]
+            matchObj['homeTeam'] = match[1]
+            matchObj['awayTeam'] = match[2]
+            matchObj['homeScore'] = match[3]
+            matchObj['awayScore'] = match[4]
+            matchObj['date'] = match[5]
+            allMatches.append(matchObj)
+
+    return render_template('schedule.html', form=scheduleForm, allMatches=allMatches)
+
+
+
+
+@app.route('/get-roster/<team>')
+def get_roster(team):
+    team = team.replace('%20', ' ')
+    conn = sqlite3.connect(database)
+    query = '''select * from player where p_team = "{}" '''.format(team)
+    rawPlayers = conn.execute(query)
+    allPlayers = []
+    for player in rawPlayers:
+        playerObj = {}
+        playerObj['name'] = player[0]
+        playerObj['height'] = player[1]
+        playerObj['weight'] = player[2]
+        playerObj['team'] = player[3]
+        playerObj['captain'] = player[4]
+        playerObj['sport'] = player[5]
+        allPlayers.append(playerObj)
+
+    return render_template('roster.html', allPlayers=allPlayers)
 
 
 
@@ -340,8 +455,9 @@ def get_teams(league):
 
 '''
 TOD-O:
- Pages for ingestion: match, record
- ***sorting page****
+ Page to change records for teams
+ Page to show players on teams, filter down from sport
+ Central page with branching links to paths?
 '''
 
 
