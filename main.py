@@ -386,6 +386,50 @@ def view_matches():
     return render_template('schedule.html', form=scheduleForm, allMatches=allMatches)
 
 
+@app.route('/add-score', methods=['GET', 'POST'])
+def add_score():
+    class scoreForm(FlaskForm):
+        date = DateField('Match Date', format='%Y-%m-%d')
+        homeTeamName = SelectField('Home Team Name:' , choices=[], validate_choice=False)
+        homeTeamScore = DecimalField('Home Team Score:')
+        awayTeamName = SelectField('Away Team Name:' , choices=[], validate_choice=False)
+        awayTeamScore = DecimalField('Away Team Score:')
+        submit = SubmitField('Submit')
+    
+    scoreForm = scoreForm()
+    conn = sqlite3.connect(database)
+    cursor = conn.cursor()
+
+    if scoreForm.validate_on_submit():
+        query = '''update match set m_teamonescore = {} where m_teamone = "{}" and m_teamtwo = "{}" and m_date = "{}" and m_teamonescore=0'''.format(scoreForm.homeTeamScore.data, scoreForm.homeTeamName.data, scoreForm.awayTeamName.data, scoreForm.date.data)
+        cursor.execute(query)
+        conn.commit()
+
+        query = '''update match set m_teamtwoscore = {} where m_teamone = "{}" and m_teamtwo = "{}" and m_date = "{}" and m_teamtwoscore=0'''.format(scoreForm.homeTeamScore.data, scoreForm.homeTeamName.data, scoreForm.awayTeamName.data, scoreForm.date.data)
+        cursor.execute(query)
+        conn.commit()
+
+        winner = scoreForm.homeTeamName.data
+        loser = scoreForm.awayTeamName.data
+        if (scoreForm.awayTeamScore.data > scoreForm.homeTeamScore.data):
+            winner = scoreForm.awayTeamName.data
+            loser = scoreForm.homeTeamName.data
+
+        query = '''update record set r_wins = r_wins+1 where r_teamname = "{}" '''.format(winner)
+        cursor.execute(query)
+        conn.commit()
+
+        query2 = '''update record set r_losses = r_losses+1 where r_teamname = "{}" '''.format(loser)
+        cursor.execute(query2)
+        conn.commit()
+
+        return render_template('score.html', form=scoreForm, success_message="successfully added score")
+
+
+
+    return render_template('score.html', form=scoreForm, success_message="")
+    
+
 
 
 @app.route('/get-roster/<team>')
@@ -446,6 +490,25 @@ def get_teams(league):
     teamNames.append({'name':'Free Agent'})
 
     return jsonify({'team_names' : teamNames})
+
+@app.route('/get-lineup/<date>')
+def get_lineup(date):
+    conn = sqlite3.connect(database)
+    query = '''select * from match where m_date = "{}" '''.format(date)
+    result = conn.execute(query)
+    matchData = []
+    for row in result:
+        matchObj = {}
+        matchObj['homeTeamName'] = row[1]
+        matchObj['awayTeamName'] = row[2]
+        matchObj['homeTeamScore'] = row[3]
+        matchObj['awayTeamScore'] = row[4]
+        matchData.append(matchObj)
+    
+    return jsonify({'matchData' : matchData})
+
+
+
     
 
 
@@ -455,7 +518,6 @@ def get_teams(league):
 
 '''
 TOD-O:
- Page to change records for teams
  Page to show players on teams, filter down from sport
  Central page with branching links to paths?
 '''
