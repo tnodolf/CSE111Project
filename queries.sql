@@ -166,13 +166,13 @@ WHERE
 SELECT r_teamname, MAX(recProp)
 FROM 
 (
-    SELECT r_teamname, (r_wins / (r_losses + 1)) as recProp
+    SELECT r_teamname
     FROM Record, Team, League
     WHERE
         r_teamname = t_name AND
         t_leaguekey = l_leaguekey AND
-        l_name = 'UWBW League 1'
-    GROUP BY r_teamname
+        l_name = 'premier league'
+    GROUP BY r_teamname order by  (r_wins / (r_losses + 1)) desc
 );
 
 -- Select team with worst record in their league

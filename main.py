@@ -431,10 +431,68 @@ def add_score():
 
         return render_template('score.html', form=scoreForm, success_message="successfully added score")
 
-
-
     return render_template('score.html', form=scoreForm, success_message="")
+
+
+@app.route("/view-standings", methods=['GET', 'POST'])
+def view_standings():
+    class standingForm(FlaskForm):
+        query = '''select s_name from sport'''
+        conn = sqlite3.connect(database)
+        result = conn.execute(query)
+        sportsNames = []
+        for row in result:
+            sportsNames.append(row[0])
+        sportName = SelectField('Sport Name:', choices = sportsNames)
+        leagueName = SelectField('League Name:'  ,choices = [], validate_choice=False)
+        submit = SubmitField('Submit')
+
+    standingForm = standingForm()
+    conn = sqlite3.connect(database)
+    cursor = conn.cursor()
+    rankings = []
+
+    if standingForm.validate_on_submit(): 
+        #get teams in order of 1,0
+        query = '''SELECT r_teamname FROM Record, Team, League WHERE
+        r_teamname = t_name AND
+        t_leaguekey = l_leaguekey AND
+        l_name = '{}' GROUP BY r_teamname order by  (r_wins / (r_losses + 1)) desc'''.format(standingForm.leagueName.data)
+        counter = 1
+        result = conn.execute(query)
+        for row in result:
+            rankObj = {}
+            rankObj[counter] = row[0]
+            counter += 1
+            rankings.append(rankObj)
+        
+    return render_template('standings.html', form=standingForm, teamNames=rankings)
+
+@app.route("/find-team", methods=['GET', 'POST'])
+def view_team():
+    class teamForm(FlaskForm):
+        query = '''select s_name from sport'''
+        conn = sqlite3.connect(database)
+        result = conn.execute(query)
+        sportsNames = []
+        for row in result:
+            sportsNames.append(row[0])
+        sportName = SelectField('Sport Name:', choices = sportsNames)
+        leagueName = SelectField('League Name:'  ,choices = [], validate_choice=False)
+        teamName = SelectField('Team Name:', choices = [], validate_choice = False)
+        submit = SubmitField('Submit')
+
+    teamForm = teamForm()
+
+    if teamForm.validate_on_submit():
+        return redirect('//localhost:5000/get-roster/' + teamForm.teamName.data)
     
+    return render_template('find-team.html', form=teamForm, success_message="")
+        
+    
+
+
+
 
 
 

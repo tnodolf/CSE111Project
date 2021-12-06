@@ -1,0 +1,64 @@
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block styles %}
+{{ super() }}
+	<style>
+		body { background: #e8f1f9; }
+	</style>
+{% endblock %}
+
+
+{% block title %}
+Referee Registration
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
+
+      <h1 class="pt-5 pb-2">Standings Displayed</h1>
+
+      <p class="lead">Select the league for which you want to see the standings</p>
+
+      {{ wtf.quick_form(form) }}
+
+      <p class="pt-5" style="margin-top:5%;color:tomato"><strong>{{ message }}</strong></p>
+        
+      <p class="pt-5" style="margin-top:5%;"><strong>Current Standings: </strong></p>
+      <ul>
+        {% for name in teamNames %}
+        <li>{{name}}</li>
+        {% endfor %}
+        </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+    let sport_select = document.getElementById('sportName');
+    let league_select = document.getElementById('leagueName');
+
+    sport_select.onchange = function() {
+        console.log(league_select.options)
+        sport  = sport_select.value;
+        fetch('/get-league/' + sport).then(function(response){
+            
+            response.json().then(function(data) {
+                let optionHtml = '';
+
+                for (let league of data.league_names){
+                    console.log(league.name);
+                    optionHtml += '<option value="' + league.name + '">' + league.name + '</option>';
+                }
+
+                league_select.innerHTML = optionHtml;
+            });
+        });
+    }
+</script>
+
+{% endblock %}
