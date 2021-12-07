@@ -1,6 +1,7 @@
 import requests
 from random_word import RandomWords
 import random
+import sqlite3
 r = RandomWords()
 
 cookies = {
@@ -29,17 +30,55 @@ headers = {
 }
 
 
-for i in range(9):
+teamName = ['Celtics', 'Bulls', 'Lakers', 'Pistons', 'Trail Blazers', 'Knicks']
+homeTeam = teamName[random.randint(0,5)]
+awayTeam = homeTeam
+while (awayTeam == homeTeam):
+    awayTeam = teamName[random.randint(0,5)]
+
+conn = sqlite3.connect('test_copy.db')
+cursor = conn.cursor()
+
+result = conn.execute('''select m_teamOne, m_teamTwo, m_date from match where m_date > '2021-12-12' ''')
+
+for row in result:
+    homeTeam = row[0]
+    awayTeam = row[1]
+    date = row[2]
+
     data = {
-    'csrf_token': 'IjU5ZjQyMjg2YjRkNzhjZmM0ZDAyYzEzMTg4YTFiMTM3N2VjNjk0YTAi.Ya6oGg.rGL389drJaFyGNem0CrTA9y4u3U',
-    'name': r.get_random_word(),
-    'height': random.randint(30, 120),
-    'weight': random.randint(50, 300),
-    'sportName': 'basketball',
-    'leagueName': 'Olympique Lyonnais',
-    'teamName': 'Knicks',
-    'isCaptain': 'No',
-    'submit': 'Submit'
+        'csrf_token': 'IjU5ZjQyMjg2YjRkNzhjZmM0ZDAyYzEzMTg4YTFiMTM3N2VjNjk0YTAi.Ya68xA.h8q79NyKMp_3ck3wRqCAZRvtuzg',
+        'date': date,
+        'homeTeamName': homeTeam,
+        'homeTeamScore': random.randint(0, 150),
+        'awayTeamName': awayTeam,
+        'awayTeamScore': random.randint(0, 150),
+        'submit': 'Submit'
     }
 
-    response = requests.post('http://localhost:5000/player', headers=headers, cookies=cookies, data=data)
+    response = requests.post('http://localhost:5000/add-score', headers=headers, cookies=cookies, data=data)
+
+'''
+for i in range(20):
+    #print("working")
+    for j in range(6):
+        homeTeam = teamName[random.randint(0,5)]
+        awayTeam = homeTeam
+        while (awayTeam == homeTeam):
+            awayTeam = teamName[random.randint(0,5)]
+        #print(homeTeam, awayTeam)
+        
+        data = {
+            'csrf_token': 'IjU5ZjQyMjg2YjRkNzhjZmM0ZDAyYzEzMTg4YTFiMTM3N2VjNjk0YTAi.Ya68xA.h8q79NyKMp_3ck3wRqCAZRvtuzg',
+            'sportName': 'basketball',
+            'leagueName': 'Olympique Lyonnais',
+            'homeTeamName': homeTeam,
+            'awayTeamName': awayTeam,
+            'date': '2021-12-' + str(10+i),
+            'submit': 'Submit'
+        }
+
+        #print(data)
+
+        #response = requests.post('http://localhost:5000/make-match', headers=headers, cookies=cookies, data=data)
+'''
