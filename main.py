@@ -457,7 +457,7 @@ def view_standings():
         query = '''SELECT r_teamname, r_wins, r_losses FROM Record, Team, League WHERE
         r_teamname = t_name AND
         t_leaguekey = l_leaguekey AND
-        l_name = '{}' GROUP BY r_teamname order by  (r_wins / (r_losses + 1)) desc'''.format(standingForm.leagueName.data)
+        l_name = '{}' GROUP BY r_teamname order by  r_wins - r_losses desc'''.format(standingForm.leagueName.data)
         counter = 1
         result = conn.execute(query)
         for row in result:
