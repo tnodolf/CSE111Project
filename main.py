@@ -407,11 +407,11 @@ def add_score():
     cursor = conn.cursor()
 
     if scoreForm.validate_on_submit():
-        query = '''update match set m_teamonescore = {} where m_teamone = "{}" and m_teamtwo = "{}" and m_date = "{}" and m_teamonescore=0'''.format(scoreForm.homeTeamScore.data, scoreForm.homeTeamName.data, scoreForm.awayTeamName.data, scoreForm.date.data)
+        query = '''update match set m_teamonescore = {} where m_teamone = "{}" and m_teamtwo = "{}" and m_date = "{}" '''.format(scoreForm.homeTeamScore.data, scoreForm.homeTeamName.data, scoreForm.awayTeamName.data, scoreForm.date.data)
         cursor.execute(query)
         conn.commit()
 
-        query = '''update match set m_teamtwoscore = {} where m_teamone = "{}" and m_teamtwo = "{}" and m_date = "{}" and m_teamtwoscore=0'''.format(scoreForm.homeTeamScore.data, scoreForm.homeTeamName.data, scoreForm.awayTeamName.data, scoreForm.date.data)
+        query = '''update match set m_teamtwoscore = {} where m_teamone = "{}" and m_teamtwo = "{}" and m_date = "{}"'''.format(scoreForm.awayTeamScore.data, scoreForm.homeTeamName.data, scoreForm.awayTeamName.data, scoreForm.date.data)
         cursor.execute(query)
         conn.commit()
 
@@ -454,7 +454,7 @@ def view_standings():
 
     if standingForm.validate_on_submit(): 
         #get teams in order of 1,0
-        query = '''SELECT r_teamname FROM Record, Team, League WHERE
+        query = '''SELECT r_teamname, r_wins, r_losses FROM Record, Team, League WHERE
         r_teamname = t_name AND
         t_leaguekey = l_leaguekey AND
         l_name = '{}' GROUP BY r_teamname order by  (r_wins / (r_losses + 1)) desc'''.format(standingForm.leagueName.data)
@@ -463,6 +463,8 @@ def view_standings():
         for row in result:
             rankObj = {}
             rankObj[counter] = row[0]
+            rankObj["wins"] = row[1]
+            rankObj["losses"] = row[2]
             counter += 1
             rankings.append(rankObj)
         
