@@ -493,11 +493,6 @@ def view_team():
         
     
 
-
-
-
-
-
 @app.route('/get-roster/<team>')
 def get_roster(team):
     team = team.replace('%20', ' ')
