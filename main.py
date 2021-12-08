@@ -17,7 +17,7 @@ database = r"test.db"
 
 app = Flask(__name__)
 # Flask-WTF requires an encryption key - the string can be anything
-app.config['SECRET_KEY'] = 'tanner-is-marginally-gay'
+app.config['SECRET_KEY'] = 'secret-key'
 
 # Flask-Bootstrap requires this line
 Bootstrap(app)
